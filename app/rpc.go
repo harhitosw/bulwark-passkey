@@ -20,7 +20,7 @@ func callRPC(ctx context.Context, name string, args ...interface{}) interface{} 
 	data := append([]interface{}{responseId}, args...)
 	runtime.EventsEmit(ctx, name+"-request", data)
 	response := <-responseChan
-	debugf("GO -> JS: %s(%v) -> %v\n", name, args, response)
+	debugf("GO -> -> ->JS: %s(%v) -> %v\n", name, args, response)
 	return response
 }
 

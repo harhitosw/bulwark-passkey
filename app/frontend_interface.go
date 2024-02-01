@@ -22,6 +22,8 @@ func approveClientAction(action string, relyingParty string, userName string) bo
 }
 
 func logIn(vaultType string, vaultData string, email string) bool {
+	message := "Here to perform getAssertion"
+	debugf("The state: %s",message)
 	response := callRPC(app.ctx, "logIn", vaultType, vaultData, email)
 	return response.(bool)
 }
