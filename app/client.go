@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+
 	//"encoding/hex"
+	"crypto/x509"
 	"encoding/base64"
 	"time"
-     "crypto/x509"
+
 	"github.com/bulwarkid/virtual-fido/identities"
 )
 
@@ -67,27 +69,27 @@ func (client *Client) loadData(vaultType string, data []byte, lastUpdated string
 	savedState, err := decryptSavedState(data, client.passphrase())
 	checkErr(err, "Could not load saved state data")
 	config, err := identities.DecryptFIDOState(savedState.VirtualFIDOConfig, client.passphrase())
-	debugf("Decrypted and unmarshalled data from : %+v",config)
+	debugf("Decrypted and unmarshalled data from : %+v", config)
 	checkErr(err, "Could not decrypt saved FIDO state")
-	// log the private key and all the other credentials stored in the safe file on the local machine 
+	// log the private key and all the other credentials stored in the safe file on the local machine
 	credPrivateKeyArray := config.Sources[0].PrivateKey
 	credIDByteArray := config.Sources[0].ID
 	// convert Credential ID Byte array to base64 format
-	base64StringID:=base64.StdEncoding.EncodeToString(credIDByteArray)
-	debugf("Base 64 of the Crrd ID: %+v",base64StringID)
-	debugf("Cred Private key array%+v",credPrivateKeyArray)
-	base64StringCredPrivateKeyArray:= base64.StdEncoding.EncodeToString(credPrivateKeyArray)
-	debugf("Base 64 of the Cred Private Key array : %+v",base64StringCredPrivateKeyArray)
+	base64StringID := base64.StdEncoding.EncodeToString(credIDByteArray)
+	debugf("Base 64 of the Crrd ID: %+v", base64StringID)
+	debugf("Cred Private key array%+v", credPrivateKeyArray)
+	base64StringCredPrivateKeyArray := base64.StdEncoding.EncodeToString(credPrivateKeyArray)
+	debugf("Base 64 of the Cred Private Key array : %+v", base64StringCredPrivateKeyArray)
 	//parse the EC private key to get the PrivateKey format of the Byte array
-	credPrivateKey,credErr := x509.ParseECPrivateKey(credPrivateKeyArray)
-    checkErr(credErr, "Could get the credential private key !!!!")
-	//convert that private key to PKCS8 format array 
-	getPKCSArray,errPKCS := x509.MarshalPKCS8PrivateKey(credPrivateKey)
+	credPrivateKey, credErr := x509.ParseECPrivateKey(credPrivateKeyArray)
+	checkErr(credErr, "Could get the credential private key !!!!")
+	//convert that private key to PKCS8 format array
+	getPKCSArray, errPKCS := x509.MarshalPKCS8PrivateKey(credPrivateKey)
 	checkErr(errPKCS, "Could get the credential private key PKCS array !!!!")
-	debugf("PKCS Array in format : %+v",getPKCSArray)
+	debugf("PKCS Array in format : %+v", getPKCSArray)
 	//encode PKCS8 format array to base64 string which is now portable to any use-case
-	base64String:= base64.StdEncoding.EncodeToString(getPKCSArray)
-	debugf("Base 64 of the PKCS array : %+v",base64String)
+	base64String := base64.StdEncoding.EncodeToString(getPKCSArray)
+	debugf("Base 64 of the PKCS array : %+v", base64String)
 	lastUpdatedTime := now()
 	err = (&lastUpdatedTime).UnmarshalText([]byte(lastUpdated))
 	checkErr(err, "Could not parse time")
@@ -95,27 +97,24 @@ func (client *Client) loadData(vaultType string, data []byte, lastUpdated string
 	client.email = email
 	client.lastUpdated = lastUpdatedTime
 	client.fidoClient.loadConfig(config)
-    b,err1:=x509.MarshalECPrivateKey(client.fidoClient.certPrivateKey)
-	checkErr(err1,"Some error here")
+	b, err1 := x509.MarshalECPrivateKey(client.fidoClient.certPrivateKey)
+	checkErr(err1, "Some error here")
 	//str:=hex.EncodeToString(b)
-	publickey1,err2:= client.fidoClient.certPrivateKey.PublicKey.ECDH()
-	checkErr(err2,"Some error here")
-	publickeyBytes:=publickey1.Bytes()
+	publickey1, err2 := client.fidoClient.certPrivateKey.PublicKey.ECDH()
+	checkErr(err2, "Some error here")
+	publickeyBytes := publickey1.Bytes()
 	//str1:=hex.EncodeToString(publickeyBytes)
-	debugf("Public Key Byte Array:%+v",publickeyBytes)
-	
-	debugf("Marshal private key byte array:%+v",b)
-	debugf("client.fidoClient.certPrivateKey:%+v",client.fidoClient.certPrivateKey)
-	
-	debugf("client.fidoClient.certPrivateKey.publickey:%+v",client.fidoClient.certPrivateKey.PublicKey)
-	
+	debugf("Public Key Byte Array:%+v", publickeyBytes)
+
+	debugf("Marshal private key byte array:%+v", b)
+	debugf("client.fidoClient.certPrivateKey:%+v", client.fidoClient.certPrivateKey)
+
+	debugf("client.fidoClient.certPrivateKey.publickey:%+v", client.fidoClient.certPrivateKey.PublicKey)
 
 	message := "Here to save"
-	debugf("The state: %s",message)
+	debugf("The state: %s", message)
 	client.save()
 }
-
-
 
 func (client *Client) updateData(data []byte, lastUpdated string) {
 	// Check if the data received is the old version
@@ -197,7 +196,7 @@ func decryptSavedState(data []byte, passphrase string) (*ClientSavedState, error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &savedState, nil
 }
 

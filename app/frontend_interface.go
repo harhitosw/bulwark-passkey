@@ -23,7 +23,7 @@ func approveClientAction(action string, relyingParty string, userName string) bo
 
 func logIn(vaultType string, vaultData string, email string) bool {
 	message := "Here to perform getAssertion"
-	debugf("The state: %s",message)
+	debugf("The state: %s", message)
 	response := callRPC(app.ctx, "logIn", vaultType, vaultData, email)
 	return response.(bool)
 }
@@ -94,8 +94,19 @@ func demoIdentities() [][]byte {
 
 func credentialSourceToIdentity(source *identities.CredentialSource) *pb.Identity {
 	publicKeyBytes := elliptic.Marshal(elliptic.P256(), source.PrivateKey.PublicKey.X, source.PrivateKey.PublicKey.Y)
-	privateKeyBytes, err := x509.MarshalECPrivateKey(source.PrivateKey)
+	privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(source.PrivateKey)
+	publicKeyBytes1, err1 := x509.MarshalPKIXPublicKey(source.PrivateKey.Public())
+	credID := source.ID
+	checkErr(err1, "could not process public key")
+	debugf("in credentialSourceToIdentity")
 	checkErr(err, "Could not marshal private key")
+	debugf("In credentialSourceToIdentity function")
+	publicKeyString := base64.StdEncoding.EncodeToString(publicKeyBytes1)
+	privateKeyString := base64.StdEncoding.EncodeToString(privateKeyBytes)
+	credIDbase64 := base64.StdEncoding.EncodeToString(credID)
+	debugf("base 64 credential id  %+v", credIDbase64)
+	debugf("Base 64 of the public key %+v", publicKeyString)
+	debugf("Base 64 of the private key %+v", privateKeyString)
 	return &pb.Identity{
 		Id: source.ID,
 		Website: &pb.RelyingParty{

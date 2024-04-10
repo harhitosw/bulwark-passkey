@@ -14,6 +14,7 @@ export class IdentityInfoModal extends React.Component<IdentityInfoModalProps> {
     render() {
         const id = this.props.identity;
         const publicKey = id.publicKey ? bytesToBase64(id.publicKey) : "";
+        console.log("public key from %s",publicKey)
         const hash = id.id ? bytesToBase64(id.id) : "";
         let content = (
             <div className="flex flex-col w-full justify-center items-center">

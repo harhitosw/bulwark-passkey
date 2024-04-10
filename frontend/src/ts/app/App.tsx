@@ -1,11 +1,11 @@
-import { Cog6ToothIcon, LockClosedIcon } from "@heroicons/react/20/solid";
+import { Cog6ToothIcon, LockClosedIcon, QrCodeIcon } from "@heroicons/react/20/solid";
 import React from "react";
 import { IdentityList } from "./IdentityList";
 import { ModalStack, setModalContainer } from "./ModalStack";
 import { Popups, setPopups } from "./Popups";
 import { Settings } from "./Settings";
 import { TabBar } from "./TabBar";
-
+import { QRcode } from "./QRcodes";
 export let app: React.RefObject<App>;
 
 export function setAppRef(newApp: React.RefObject<App>) {
@@ -21,11 +21,14 @@ export type Tab = {
 export enum TabID {
     IDENTITIES = 1,
     SETTINGS,
+    QRCODE,
 }
 
 const defaultTabs = [
     { id: TabID.IDENTITIES, name: "Identities", icon: LockClosedIcon },
     { id: TabID.SETTINGS, name: "Settings", icon: Cog6ToothIcon },
+    { id: TabID.QRCODE, name: "QR", icon: QrCodeIcon}
+     
 ];
 
 type AppState = {
@@ -56,6 +59,9 @@ export class App extends React.Component<{}, AppState> {
             page = <Settings />;
         } else if (this.state.activeTab === TabID.IDENTITIES) {
             page = <IdentityList />;
+        }
+        else if (this.state.activeTab=== TabID.QRCODE){
+            page = <QRcode/>;
         }
         return (
             <div className="w-screen h-screen">
