@@ -46,9 +46,9 @@ export class QRcode extends React.Component<{},QRCodeSate>{
     if(this.state.isLoading){
       return <div>Loading.....</div>
     } 
-       const ID = this.state.identities[1].id ?bytesToBase64(this.state.identities[1].id) : "";
-       const publicKey = this.state.identities[1].publicKey? bytesToBase64(this.state.identities[1].publicKey) : "";
-       const privateKey= this.state.identities[1].privateKey? bytesToBase64(this.state.identities[1].privateKey) : "";
+       const ID = this.state.identities[0].id ?bytesToBase64(this.state.identities[0].id) : "";
+       const publicKey = this.state.identities[0].publicKey? bytesToBase64(this.state.identities[0].publicKey) : "";
+       const privateKey= this.state.identities[0].privateKey? bytesToBase64(this.state.identities[0].privateKey) : "";
        
        const finalString = ID +" "+ publicKey+" "+privateKey;
 

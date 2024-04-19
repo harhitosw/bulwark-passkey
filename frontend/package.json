@@ -17,6 +17,7 @@
         "@types/react": "^18.0.20",
         "@types/react-dom": "^18.0.6",
         "@wailsapp/runtime": "^1.1.1",
+        "crypto": "^1.0.1",
         "google-protobuf": "^3.21.2",
         "proto": "^1.0.19",
         "protoc": "^1.1.3",

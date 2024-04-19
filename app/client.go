@@ -2,11 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 
 	//"encoding/hex"
 	"crypto/x509"
-	"encoding/base64"
+
 	"time"
 
 	"github.com/bulwarkid/virtual-fido/identities"
@@ -72,24 +73,27 @@ func (client *Client) loadData(vaultType string, data []byte, lastUpdated string
 	debugf("Decrypted and unmarshalled data from : %+v", config)
 	checkErr(err, "Could not decrypt saved FIDO state")
 	// log the private key and all the other credentials stored in the safe file on the local machine
-	credPrivateKeyArray := config.Sources[0].PrivateKey
-	credIDByteArray := config.Sources[0].ID
-	// convert Credential ID Byte array to base64 format
-	base64StringID := base64.StdEncoding.EncodeToString(credIDByteArray)
-	debugf("Base 64 of the Crrd ID: %+v", base64StringID)
-	debugf("Cred Private key array%+v", credPrivateKeyArray)
-	base64StringCredPrivateKeyArray := base64.StdEncoding.EncodeToString(credPrivateKeyArray)
-	debugf("Base 64 of the Cred Private Key array : %+v", base64StringCredPrivateKeyArray)
-	//parse the EC private key to get the PrivateKey format of the Byte array
-	credPrivateKey, credErr := x509.ParseECPrivateKey(credPrivateKeyArray)
-	checkErr(credErr, "Could get the credential private key !!!!")
-	//convert that private key to PKCS8 format array
-	getPKCSArray, errPKCS := x509.MarshalPKCS8PrivateKey(credPrivateKey)
-	checkErr(errPKCS, "Could get the credential private key PKCS array !!!!")
-	debugf("PKCS Array in format : %+v", getPKCSArray)
-	//encode PKCS8 format array to base64 string which is now portable to any use-case
-	base64String := base64.StdEncoding.EncodeToString(getPKCSArray)
-	debugf("Base 64 of the PKCS array : %+v", base64String)
+	if len(config.Sources) != 0 {
+		credPrivateKeyArray := config.Sources[0].PrivateKey
+		credIDByteArray := config.Sources[0].ID
+		// convert Credential ID Byte array to base64 format
+		base64StringID := base64.StdEncoding.EncodeToString(credIDByteArray)
+		debugf("Base 64 of the Crrd ID: %+v", base64StringID)
+		debugf("Cred Private key array%+v", credPrivateKeyArray)
+		base64StringCredPrivateKeyArray := base64.StdEncoding.EncodeToString(credPrivateKeyArray)
+		debugf("Base 64 of the Cred Private Key array : %+v", base64StringCredPrivateKeyArray)
+		//parse the EC private key to get the PrivateKey format of the Byte array
+		credPrivateKey, credErr := x509.ParseECPrivateKey(credPrivateKeyArray)
+		checkErr(credErr, "Could get the credential private key !!!!")
+		//convert that private key to PKCS8 format array
+		getPKCSArray, errPKCS := x509.MarshalPKCS8PrivateKey(credPrivateKey)
+		checkErr(errPKCS, "Could get the credential private key PKCS array !!!!")
+		debugf("PKCS Array in format : %+v", getPKCSArray)
+		//encode PKCS8 format array to base64 string which is now portable to any use-case
+		base64String := base64.StdEncoding.EncodeToString(getPKCSArray)
+		debugf("Base 64 of the PKCS array : %+v", base64String)
+	}
+
 	lastUpdatedTime := now()
 	err = (&lastUpdatedTime).UnmarshalText([]byte(lastUpdated))
 	checkErr(err, "Could not parse time")
@@ -114,6 +118,7 @@ func (client *Client) loadData(vaultType string, data []byte, lastUpdated string
 	message := "Here to save"
 	debugf("The state: %s", message)
 	client.save()
+
 }
 
 func (client *Client) updateData(data []byte, lastUpdated string) {
